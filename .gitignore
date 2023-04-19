@@ -9,6 +9,10 @@ __pycache__/
 # Idea files:
 .idea
 
+# Logs:
+.log
+
+
 # Distribution / packaging
 .Python
 build/

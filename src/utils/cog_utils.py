@@ -1,4 +1,4 @@
-from bot import Bot
+from src.bot import Bot
 from fnmatch import fnmatch
 from os import walk
 
