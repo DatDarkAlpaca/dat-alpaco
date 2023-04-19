@@ -7,9 +7,12 @@ from bot import Bot
 
 
 def main():
+    intents = discord.Intents().default()
+    intents.voice_states = True
+
     bot = Bot(
         commands.when_mentioned_or('.'),
-        intents=discord.Intents.default(),
+        intents=intents,
         case_insensitive=True,
         help_command=None,
     )
