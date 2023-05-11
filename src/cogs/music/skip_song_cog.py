@@ -18,6 +18,10 @@ class SkipSongCog(commands.Cog):
             return
 
         if vc.queue.is_empty:
+            if vc.current:
+                await vc.stop()
+                return await single_embed(ctx, f"{ctx.user.mention} has skipped the current song.\n")
+
             return await respond_ephemeral(ctx, "There is no more songs in the queue.")
 
         await play_next(vc)
