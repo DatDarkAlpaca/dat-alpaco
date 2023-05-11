@@ -22,6 +22,15 @@ class MuteSongCog(commands.Cog):
         self.bot = bot
         self.current_filter = {}
 
+    @filter.command(description='Resets the current filters')
+    async def reset(self, ctx):
+        vc: wavelink.Player = await self.bot.get_cog('VoiceChannelCog').connect_and_get_voice_client(ctx)
+        if not vc:
+            return
+
+        await vc.set_filter(wavelink.Filter())
+        await single_embed(ctx, f"{ctx.user.mention} has reset all filters!")
+
     @filter.command(description='Applies an equalizer filter from a list of presets')
     async def equalizer(self, ctx,
                         preset: Option(str, autocomplete=utils.basic_autocomplete(get_equalizer_presets))):
@@ -241,6 +250,7 @@ class MuteSongCog(commands.Cog):
         else:
             return await respond_ephemeral(ctx, 'This filter preset does not exist.')
 
+        print(ctx.guild.id)
         current_filter = self.current_filter.get(ctx.guild.id)
         if current_filter:
             new_filter = wavelink.Filter(current_filter, channel_mix=channel_mix)
