@@ -1,23 +1,11 @@
-from discord.ext import commands
-import discord
-import os
-
-from utils.cog_utils import load_cogs
 from bot import Bot
+import os
 
 
 def main():
-    intents = discord.Intents().default()
-    intents.voice_states = True
+    bot = Bot()
+    bot.create_group('music', 'Music related commands')
 
-    bot = Bot(
-        commands.when_mentioned_or('.'),
-        intents=intents,
-        case_insensitive=True,
-        help_command=None,
-    )
-
-    load_cogs(bot)
     bot.run(os.getenv('TOKEN'), reconnect=True)
 
 
