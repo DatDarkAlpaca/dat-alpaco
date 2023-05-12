@@ -1,12 +1,13 @@
 from discord import Embed
 import wavelink
+from wavelink.ext import spotify
 from src.utils.time_utils import get_time_length
-from src.utils.string_utils import get_video_thumbnail_url
+from src.utils.string_utils import get_youtube_video_thumbnail_url, get_spotify_video_thumbnail_url, get_spotify_track_url
 
 
 # Music:
 def embed_play(track: wavelink.Playable) -> Embed:
-    embed = Embed(title="🎶 Alpacos' Player", color=0x38f2ff)
+    embed = Embed(title="🎶 Alpaco's Player", color=0x38f2ff)
 
     track_name = track.title[0:100]
     embed.add_field(name='Track: ', value=f"[`{track_name}`]({track.uri})", inline=True)
@@ -16,7 +17,25 @@ def embed_play(track: wavelink.Playable) -> Embed:
 
     embed.add_field(name='Duration: ', value=get_time_length(track.length / 1000), inline=True)
 
-    embed.set_image(url=get_video_thumbnail_url(track.uri))
+    embed.set_thumbnail(url=get_youtube_video_thumbnail_url(track.uri))
+
+    return embed
+
+
+def embed_play_spotify(track: spotify.SpotifyTrack) -> Embed:
+    embed = Embed(title="🎶 Alpaco's Player", color=0x38f2ff)
+
+    track_name = track.title[0:100]
+    embed.add_field(name='Track: ', value=f"[`{track_name}`]({get_spotify_track_url(track.uri)})", inline=True)
+
+    author = ' | '.join(track.artists)
+    embed.add_field(name='Author: ', value=f"[`{author}`]({get_spotify_track_url(track.uri)})", inline=True)
+
+    embed.add_field(name='Album: ', value=f"[`{track.album}`]({get_spotify_track_url(track.uri)})", inline=True)
+
+    embed.add_field(name='Duration: ', value=get_time_length(track.length / 1000), inline=True)
+
+    embed.set_thumbnail(url=get_spotify_video_thumbnail_url(track.images))
 
     return embed
 

@@ -15,7 +15,7 @@ def get_channel_mix_presets(_: AutocompleteContext) -> list:
     return ['Full Left', 'Full Right', 'Mono', 'Only Left', 'Only Right', 'Switch']
 
 
-class MuteSongCog(commands.Cog):
+class FilterSongCog(commands.Cog):
     filter = SlashCommandGroup(name='filter', description='Filter related commands')
 
     def __init__(self, bot):
@@ -28,7 +28,10 @@ class MuteSongCog(commands.Cog):
         if not vc:
             return
 
-        await vc.set_filter(wavelink.Filter())
+        new_filter = wavelink.Filter()
+        self.current_filter[ctx.guild.id] = new_filter
+        await vc.set_filter(new_filter)
+
         await single_embed(ctx, f"{ctx.user.mention} has reset all filters!")
 
     @filter.command(description='Applies an equalizer filter from a list of presets')
@@ -62,10 +65,10 @@ class MuteSongCog(commands.Cog):
 
     @filter.command(description='Applies a karaoke filter to the player')
     async def karaoke(self, ctx,
-                      level: Option(float, default=1.0),
-                      mono_level: Option(float, default=1.0),
-                      filter_band: Option(float, default=220.0),
-                      filter_width: Option(float, default=100.0)):
+                      level: Option(float, default=1.0, description='Default: 1.0'),
+                      mono_level: Option(float, default=1.0, description='Default: 1.0'),
+                      filter_band: Option(float, default=220.0, description='Default: 220.0'),
+                      filter_width: Option(float, default=100.0, description='Default: 100.0')):
 
         vc: wavelink.Player = await self.bot.get_cog('VoiceChannelCog').connect_and_get_voice_client(ctx)
         if not vc:
@@ -89,9 +92,9 @@ class MuteSongCog(commands.Cog):
 
     @filter.command(description='Applies a timescale filter to the player')
     async def timescale(self, ctx,
-                        speed: Option(float, default=1.0),
-                        pitch: Option(float, default=1.0),
-                        rate: Option(float, default=1.0)):
+                        speed: Option(float, default=1.0, description='Default: 1.0'),
+                        pitch: Option(float, default=1.0, description='Default: 1.0'),
+                        rate: Option(float, default=1.0, description='Default: 1.0')):
 
         vc: wavelink.Player = await self.bot.get_cog('VoiceChannelCog').connect_and_get_voice_client(ctx)
         if not vc:
@@ -112,8 +115,8 @@ class MuteSongCog(commands.Cog):
 
     @filter.command(description='Applies a tremolo filter to the player')
     async def tremolo(self, ctx,
-                      frequency: Option(float, default=2.0),
-                      depth: Option(float, default=0.5)):
+                      frequency: Option(float, default=2.0, description='Default: 2.0'),
+                      depth: Option(float, default=0.5, description='Default: 0.5')):
 
         vc: wavelink.Player = await self.bot.get_cog('VoiceChannelCog').connect_and_get_voice_client(ctx)
         if not vc:
@@ -134,8 +137,8 @@ class MuteSongCog(commands.Cog):
 
     @filter.command(description='Applies a vibrato filter to the player')
     async def vibrato(self, ctx,
-                      frequency: Option(float, default=2.0),
-                      depth: Option(float, default=0.5)):
+                      frequency: Option(float, default=2.0, description='Default: 2.0'),
+                      depth: Option(float, default=0.5, description='Default: 0.5')):
 
         vc: wavelink.Player = await self.bot.get_cog('VoiceChannelCog').connect_and_get_voice_client(ctx)
         if not vc:
@@ -155,7 +158,7 @@ class MuteSongCog(commands.Cog):
                                 f"`/filter reset`")
 
     @filter.command(description='Applies a rotation filter to the player')
-    async def rotation(self, ctx, speed: Option(float, default=5.0)):
+    async def rotation(self, ctx, speed: Option(float, default=5.0, description='Default: 5.0')):
         vc: wavelink.Player = await self.bot.get_cog('VoiceChannelCog').connect_and_get_voice_client(ctx)
         if not vc:
             return
@@ -175,14 +178,14 @@ class MuteSongCog(commands.Cog):
 
     @filter.command(description='Applies a distortion filter to the player')
     async def distortion(self, ctx,
-                         sin_offset: Option(float, default=0.0),
-                         sin_scale: Option(float, default=1.0),
-                         cos_offset: Option(float, default=0.0),
-                         cos_scale: Option(float, default=1.0),
-                         tan_offset: Option(float, default=0.0),
-                         tan_scale: Option(float, default=1.0),
-                         offset: Option(float, default=0.0),
-                         scale: Option(float, default=1.0),):
+                         sin_offset: Option(float, default=0.0, description='Default: 0.0'),
+                         sin_scale: Option(float, default=1.0, description='Default: 1.0'),
+                         cos_offset: Option(float, default=0.0, description='Default: 0.0'),
+                         cos_scale: Option(float, default=1.0, description='Default: 1.0'),
+                         tan_offset: Option(float, default=0.0, description='Default: 0.0'),
+                         tan_scale: Option(float, default=1.0, description='Default: 1.0'),
+                         offset: Option(float, default=0.0, description='Default: 0.0'),
+                         scale: Option(float, default=1.0, description='Default: 1.0'),):
 
         vc: wavelink.Player = await self.bot.get_cog('VoiceChannelCog').connect_and_get_voice_client(ctx)
         if not vc:
@@ -206,10 +209,10 @@ class MuteSongCog(commands.Cog):
     # Channel Mix:
     @filter.command(description='Applies a channel mix filter to the player')
     async def channel_mix(self, ctx,
-                          left_to_left: Option(float, default=1.0),
-                          left_to_right: Option(float, default=1.0),
-                          right_to_left: Option(float, default=1.0),
-                          right_to_right: Option(float, default=1.0)):
+                          left_to_left: Option(float, default=1.0, description='Default: 1.0'),
+                          left_to_right: Option(float, default=1.0, description='Default: 1.0'),
+                          right_to_left: Option(float, default=1.0, description='Default: 1.0'),
+                          right_to_right: Option(float, default=1.0, description='Default: 1.0')):
         vc: wavelink.Player = await self.bot.get_cog('VoiceChannelCog').connect_and_get_voice_client(ctx)
         if not vc:
             return
@@ -250,7 +253,6 @@ class MuteSongCog(commands.Cog):
         else:
             return await respond_ephemeral(ctx, 'This filter preset does not exist.')
 
-        print(ctx.guild.id)
         current_filter = self.current_filter.get(ctx.guild.id)
         if current_filter:
             new_filter = wavelink.Filter(current_filter, channel_mix=channel_mix)
@@ -263,7 +265,7 @@ class MuteSongCog(commands.Cog):
                                 f"`/filter reset`")
 
     @filter.command(description='Applies a low pass filter to the player')
-    async def low_pass(self, ctx, smoothing: Option(float, default=20.0)):
+    async def low_pass(self, ctx, smoothing: Option(float, default=20.0, description='Default: 20.0')):
         vc: wavelink.Player = await self.bot.get_cog('VoiceChannelCog').connect_and_get_voice_client(ctx)
         if not vc:
             return
@@ -283,4 +285,4 @@ class MuteSongCog(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(MuteSongCog(bot))
+    bot.add_cog(FilterSongCog(bot))
