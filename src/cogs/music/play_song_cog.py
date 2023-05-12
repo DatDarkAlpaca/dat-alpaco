@@ -1,9 +1,12 @@
 import discord
 import wavelink
+from wavelink.ext import spotify
 from discord.ext import commands
 
-from src.utils.embed_utils import embed_play
 from src.utils.player_utils import play_next
+from src.utils.embed_utils import embed_play, embed_play_spotify
+from src.utils.context_utils import respond_ephemeral, single_embed
+from src.utils.string_utils import is_youtube_url, is_spotify_url, is_sound_cloud_url
 
 
 class SearchTrackSelect(discord.ui.Select):
@@ -12,7 +15,7 @@ class SearchTrackSelect(discord.ui.Select):
 
         options = []
         for track in tracks:
-            options.append(discord.SelectOption(label=track.title,
+            options.append(discord.SelectOption(label=track.title[0:100],
                                                 description=f"Track from {track.author}",
                                                 emoji='🎶',
                                                 value=track.uri))
@@ -28,9 +31,7 @@ class SearchTrackSelect(discord.ui.Select):
         if not self.vc.current:
             await self.vc.play(self.vc.queue.get())
 
-        embed = embed_play(track)
-
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed_play(track))
 
 
 class SearchTrackView(discord.ui.View):
@@ -55,8 +56,40 @@ class PlaySongCog(commands.Cog):
         if not vc:
             return
 
-        tracks = await wavelink.YouTubeTrack.search(search_query, return_first=False)
-        await ctx.send('Choose a track!', view=SearchTrackView(vc, tracks))
+        if is_youtube_url(search_query):
+            track = await wavelink.YouTubeTrack.search(search_query, return_first=True)
+            await self.add_track_to_queue(vc, track)
+            return await ctx.respond(embed=embed_play(track))
+
+        elif is_spotify_url(search_query):
+            return await self.handle_spotify(ctx, vc, search_query)
+
+        elif is_sound_cloud_url(search_query):
+            track = await wavelink.SoundCloudTrack.search(search_query, return_first=True)
+            await self.add_track_to_queue(vc, track)
+            return await ctx.respond(embed=embed_play(track))
+
+        else:
+            tracks = await wavelink.YouTubeTrack.search(search_query, return_first=False)
+            await ctx.respond(':guitar: Choose a track: ', view=SearchTrackView(vc, tracks))
+
+    # Helpers:
+    @staticmethod
+    async def add_track_to_queue(vc: wavelink.Player, track: wavelink.Playable):
+        vc.queue.put(track)
+
+        if not vc.current:
+            await vc.play(vc.queue.get())
+
+    async def handle_spotify(self, ctx, vc: wavelink.Player, search_query: str):
+        decoded = spotify.decode_url(search_query)
+        if not decoded:
+            return await respond_ephemeral(ctx, 'Invalid spotify url')
+
+        if decoded['type'] == spotify.SpotifySearchType.track:
+            track = await spotify.SpotifyTrack.search(search_query)
+            await self.add_track_to_queue(vc, track)
+            return await ctx.respond(embed=embed_play_spotify(track))
 
 
 def setup(bot):
