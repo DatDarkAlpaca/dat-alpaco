@@ -17,13 +17,18 @@ def get_spotify_track_url(spotify_uri: str) -> str:
     return f"https://open.spotify.com/track/{spotify_uri.split(':')[-1]}"
 
 
+def is_youtube_playlist(url: str) -> bool:
+    result = re.search("^.*(youtu.be\/|list=)([^#\&\?]*).*", url)
+    return result is not None
+
+
 def is_youtube_url(url: str) -> bool:
     result = re.search("^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$", url)
     return result is not None
 
 
 def is_spotify_url(url: str) -> bool:
-    result = re.search("^(?:spotify:|https:\/\/[a-z]+\.spotify\.com\/(track\/|user\/(.*)\/playlist\/))(.*)$", url)
+    result = re.search("^(spotify:|https:\/\/[a-z]+\.spotify\.com\/)", url)
     return result is not None
 
 

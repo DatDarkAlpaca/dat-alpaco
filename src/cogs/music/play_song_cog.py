@@ -1,11 +1,9 @@
 import discord
-import wavelink
-from wavelink.ext import spotify
 from discord.ext import commands
 
+from src.utils.embed_utils import *
 from src.utils.player_utils import play_next
-from src.utils.embed_utils import embed_play, embed_play_spotify
-from src.utils.context_utils import respond_ephemeral, single_embed
+from src.utils.context_utils import respond_ephemeral
 from src.utils.string_utils import is_youtube_url, is_spotify_url, is_sound_cloud_url
 
 
@@ -56,7 +54,10 @@ class PlaySongCog(commands.Cog):
         if not vc:
             return
 
-        if is_youtube_url(search_query):
+        if is_youtube_playlist(search_query):
+            return
+
+        elif is_youtube_url(search_query):
             track = await wavelink.YouTubeTrack.search(search_query, return_first=True)
             await self.add_track_to_queue(vc, track)
             return await ctx.respond(embed=embed_play(track))
@@ -90,6 +91,12 @@ class PlaySongCog(commands.Cog):
             track = await spotify.SpotifyTrack.search(search_query)
             await self.add_track_to_queue(vc, track)
             return await ctx.respond(embed=embed_play_spotify(track))
+
+        elif decoded['type'] == spotify.SpotifySearchType.unusable:
+            return await respond_ephemeral(ctx, 'This URL yielded an unusable query type.')
+
+        else:
+            return await respond_ephemeral(ctx, 'This functionality is not available yet.')
 
 
 def setup(bot):
