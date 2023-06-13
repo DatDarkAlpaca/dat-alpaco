@@ -29,10 +29,9 @@ class Bot(commands.Bot):
             client_secret=os.getenv('SPOTIFY_SECRET'),
         )
 
-        node: wavelink.Node = wavelink.Node(uri=os.getenv('WAVELINK_URI'), password=os.getenv('WAVELINK_PASSWORD'))
-        await wavelink.NodePool.connect(client=self, nodes=[node], spotify=spotify_client)
-
-        self.logger.info('Wavelink node connected successfully.')
+        # node: wavelink.Node = wavelink.Node(uri=os.getenv('WAVELINK_URI'), password=os.getenv('WAVELINK_PASSWORD'))
+        # await wavelink.NodePool.connect(client=self, nodes=[node], spotify=spotify_client)
+        # self.logger.info('Wavelink node connected successfully.')
 
     def load_cogs(self):
         file_pattern = '*.py'
