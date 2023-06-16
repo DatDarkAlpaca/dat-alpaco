@@ -38,3 +38,37 @@ class Logger:
 
     def critical(self, message: str):
         self.logger.critical(message)
+
+
+def create_default_logger_file():
+    file_text = """version: 1
+disable_existing_loggers: false
+
+formatters:
+    default:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    datefmt: "[%Y-%m-%d %H:%M:%S]"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: default
+    stream: ext://sys.stdout
+
+file:
+  class: logging.handlers.TimedRotatingFileHandler
+  level: DEBUG
+  formatter: default
+  when: D
+  backupCount: 0
+  filename: ./res/client.log
+
+loggers:
+  root:
+    level: INFO
+    handlers: [console, file]"""
+
+    file = open('../res/config.yaml', 'w')
+    file.write(file_text)
+    file.close()
